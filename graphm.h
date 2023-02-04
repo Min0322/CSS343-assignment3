@@ -17,10 +17,13 @@
 // - For the initial integer, end input with 0. 
 // -------------------------------------------------------------------
 
-#ifndef graphm_h
-#define graphm_h
+#ifndef GRAPHM_H
+#define GRAPHM_H
+#include <iomanip>
+#include <limits.h>
 #include "nodedata.h"
 #include "stdio.h"
+
 
 class GraphM
 {
@@ -53,9 +56,9 @@ class GraphM
         int C[MAXNODES] [MAXNODES];       // Cost array, the adjacency matrix
         int size;                         // Number of nodes in the graph
         TableType T[MAXNODES] [MAXNODES]; // Stores Dijkstra information
-        void makeEmpty();                 // make the table empty
-        void displayPath(int, int) const; // print path from/to node
-        void displayName(int, int) const; // print descriptions
+        void makeEmpty();                 // Make the table empty
+        void displayPath(int, int) const; // Print path from/to node
+        void displayName(int, int) const; // Print descriptions
 };
 
-#endif;
+#endif

@@ -19,8 +19,7 @@
 
 
 #include "graphm.h"
-#include <iomanip>
-#include <limits.h>
+
 using namespace std;
 
 // --------------------------------------------------------------------
@@ -59,32 +58,26 @@ GraphM :: ~GraphM()
 // between each node reading from a file
 // --------------------------------------------------------------------
 
-void GraphM :: buildGraph(ifstream& infile1)
+void GraphM::buildGraph(ifstream& infile1)
 {
     makeEmpty();
     int from, to, dist;
-    string nameOfNode = ""; // Name of each node
-    getline(infile1, nameOfNode);
     infile1 >> size;
-
-    if(size > 0)
-    {
-        for(int i = 1; i <= size; i++)
-        {
-            data[i].setData(infile1); // Setting Names of the node
+    if(size > 0) {
+        string str;
+        getline(infile1, str);
+        for(int i = 1; i <= size; i++) {
+            data[i].setData(infile1);
         }
-
-        while (infile1 >> from >> to >> dist)
-        {
-            if(from == 0)
-            {
-                break; // Reading the file until from node is zero
+        while(infile1 >> from >> to >> dist) {
+            if(from == 0) {
+                break;
             }
-
-            C[from][to] = dist; // Setting the C table
+            insertEdge(from, to, dist);
         }
     }
 }
+
 
 // --------------------------------------------------------------------
 // findShortestPath
@@ -93,69 +86,35 @@ void GraphM :: buildGraph(ifstream& infile1)
 // --------------------------------------------------------------------
 void GraphM :: findShortestPath()
 {
-    int minimumDistance, vertex;
-
-    for(int source = 1; source <= size; source++)
-    {
+    for(int source = 1; source <= size; source++) {
         T[source][source].dist = 0;
-        T[source][source].visited = true;
-
-        for(int n = 1; n <= size; n++)
-        {
-            if(C[source][n] != INT_MAX)
-            {
-                T[source][n].dist = C[source][n];
-                T[source][n].path = source;
+        for(int i = 1; i <=size; i++) {
+            int v = -1;
+            int minDist = INT_MAX;
+            for(int j = 1; j <= size; j++) {
+                if(T[source][j].dist <minDist && !T[source][j].visited) {
+                    minDist = T[source][j].dist;
+                    v = j;
+                }
+            }
+            if(v == -1) {
+                break;
+            }
+            T[source][v].visited = true;
+            for(int w = 1; w <= size; w++) {
+                if(C[v][w] < INT_MAX && !T[source][w].visited) {
+                    if(T[source][v].dist + C[v][w] < T[source][w].dist) {
+                        T[source][w].dist = T[source][v].dist + C[v][w];
+                        T[source][w].path = v;
+                    }
+                }
             }
         }
-
-        do
-        {
-           minimumDistance = INT_MAX;
-           vertex = 0; // Smallest Vertex
-
-           for(int n = 1; n <= size; n++)
-           {
-                if(!T[source][n].visited && (C[source][n] < minimumDistance))
-                {
-                    minimumDistance = C[source][n];
-                    vertex = n;
-                }
-           }
-
-           if(vertex == 0)
-           {
-            break; // if vertex is 0, end the loop
-           }
-
-           T[source][vertex].visited = true; // Node visited
-
-           for(int i = 1; i <= size; i++)
-           {
-             if(T[source][i].visited)
-             {
-                continue;
-             }
-
-             if(C[vertex][i] == INT_MAX)
-             {
-                continue;
-             }
-
-             if(vertex == i)
-             {
-                continue;
-             }
-
-             if(T[source][i].dist > T[source][vertex].dist + C[vertex][i])
-             {
-                T[source][i].dist = T[source][vertex].dist + C[vertex][i];
-                T[source][i].path = vertex;
-             }
-           }
+    }
+    for(int i = 1; i <= size; i++) {
+        for(int j = 1; j <= size; j++) {
+            T[i][j].visited = false;
         }
-        while(vertex != 0);
-        
     }
 }
 
@@ -220,40 +179,40 @@ void GraphM :: display(int from, int to) const
 // Displays all the shortest distance of all algorithms
 // Using helper function: displayPath
 // --------------------------------------------------------------------
-void GraphM :: displayAll() const
+void GraphM::displayAll() const
 {
     // print table titles for readout
     cout << "Description" << setw(20) << "From node" << setw(10) << "To node"
-    << setw(14) << "Dijkstra's" << setw(7) << "Path" << endl;
+        << setw(14) << "Dijkstra's" << setw(7) << "Path" << endl;
 
-    for (int i = 1; i <= size; i++)
+    for (int from = 1; from <= size; from++)
     {
-        cout << data[i] << endl << endl;     
+        cout << data[from] << endl << endl;     // print node name
 
-        for (int j = 1; j <= size; j++)
+        for (int to = 1; to <= size; to++)
         {
-            if (T[i][j].dist != 0)
+            if (T[from][to].dist != 0)
             {
+                cout << setw(27) << from;   // print from node
+                cout << setw(10) << to;     // print to node
 
-                cout << setw(27) << i;   
-                cout << setw(10) << j;     
-
-                if (T[i][j].dist == INT_MAX)
+                if (T[from][to].dist == INT_MAX)
                 {
-                    cout << setw(12) << "----" << endl; // no adjacent node
+                    cout << setw(12) << "----" << endl; // no adjacent nodes
                 }
                 else
                 {
-                    cout << setw(12) << T[i][j].dist;   // print distance
+                    cout << setw(12) << T[from][to].dist;   // print distance
                     cout << setw(10);
 
-                    displayPath(i, j); 
+                    displayPath(from, to); // call helper
                     cout << endl;
                 }
             }
         }
     }
 }
+
 
 // --------------------------------------------------------------------
 // makeEmpty
@@ -281,20 +240,14 @@ void GraphM :: makeEmpty()
 // outputs Dijkstra's path as integer values to cout and 
 // retrieves the path backwards using recursion and prints in proper order
 // --------------------------------------------------------------------
-void GraphM :: displayPath(int from, int to) const
+void GraphM::displayPath(int from, int to) const
 {
     int v = T[from][to].path;
-
-    if(v != 0) 
-    {
-
+    if(v != 0) {
         displayPath(from, v);
         cout << to << " ";
-
     } else if (from == to) {
-
         cout << to << " ";
-
     }
 }
 
@@ -302,22 +255,15 @@ void GraphM :: displayPath(int from, int to) const
 // displayName
 // displays the path data of the two integers that passed in
 // --------------------------------------------------------------------
-void GraphM :: displayName(int from, int to) const
+void GraphM::displayName(int from, int to) const
 {
     int v = T[from][to].path;
-
     if(v != 0) {
-
         displayName(from, v);
         cout << data[to] << endl;
-
     } else if (from == to) {
-
         cout << data[to] << endl;
-
     }
-
     cout << endl;
 }
-
 
