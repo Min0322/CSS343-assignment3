@@ -46,29 +46,47 @@ GraphL :: ~GraphL()
 // Builds up graph node information and adjacency matrix of edges
 // between each node reading from a file
 // --------------------------------------------------------------------
-void GraphL::buildGraph(ifstream& infile)
+void GraphL :: buildGraph(ifstream& infile2)
 {
+
     int from, to;
-    infile >> size;
-    if(size > 0) {
+
+    infile2 >> size;
+
+    if(size > 0) 
+    {
         string str;
-        getline(infile, str);
-        for(int i = 1; i <= size; i++) {
+        getline(infile2, str);
+        for(int i = 1; i <= size; i++) 
+        {
+
             graph[i].data = new NodeData();
-            graph[i].data -> setData(infile);
+            graph[i].data -> setData(infile2);
+
         }
-        while(infile >> from >> to) {
-            if(from == 0) {
+
+        while(infile2 >> from >> to) 
+        {
+            if(from == 0) 
+            {
                 break;
             }
+
             EdgeNode* node = new EdgeNode;
             node -> adjGraphNode = to;
-            if(graph[from].edgeHead == NULL) {
+
+            if(graph[from].edgeHead == NULL) 
+            {
+
                 graph[from].edgeHead = node;
                 graph[from].edgeHead -> nextEdge = NULL;
-            } else {
+
+            } else 
+            {
+
                 node -> nextEdge = graph[from].edgeHead;
                 graph[from].edgeHead = node;
+
             }
         }
     }
@@ -78,14 +96,16 @@ void GraphL::buildGraph(ifstream& infile)
 // depthFirstSearch
 // makes a depth-first search and displays each node in depth-first order
 // ----------------------------------------------------------------------
-void GraphL::depthFirstSearch()
+void GraphL :: depthFirstSearch()
 {
     cout << "Depth-first ordering: ";
 
-    for(int i = 1; i <= size; i++) { 
+    for(int i = 1; i <= size; i++) 
+    { 
 
-        if(!graph[i].visited) {         // Checking whether the node has been visited
-            dfsHelper(i);               // Call helper
+        if(!graph[i].visited) // Checking whether the node has been visited
+        {         
+            dfsHelper(i);     // Call helper
         }
 
     }
@@ -101,17 +121,21 @@ void GraphL :: displayGraph()
 {
     cout << "Graph: " << endl;
 
-    for(int i = 1; i <= size; i++) {
+    for(int i = 1; i <= size; i++) 
+    {
 
         cout << "Node" << i << "\t\t " << *graph[i].data << endl << endl;
 
         EdgeNode* current = graph[i].edgeHead; // Assign to the current one
         while(current != NULL)                 // Check for linked list
         {   
+
             cout << setw(7) << "edge  " << i << setw(2) << current -> adjGraphNode << endl;
             current = current -> nextEdge;     // Move pointer to next node
+
         }
     }
+    
     cout << endl;
 }
 
